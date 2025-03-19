@@ -13,15 +13,22 @@
         android:theme="@style/Theme.Learn"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".stateObject.StateObjectActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Learn">
+            android:label="@string/title_activity_state_object"
+            android:theme="@style/Theme.Learn" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".main.MainActivity"
+            android:exported="false"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Learn">
+
         </activity>
     </application>
 

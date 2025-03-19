@@ -1,4 +1,4 @@
-package com.compose.learn.ui.theme
+package com.compose.learn.stateObject.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
