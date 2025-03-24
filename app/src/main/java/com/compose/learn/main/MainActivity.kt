@@ -9,11 +9,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -33,15 +36,46 @@ class MainActivity : ComponentActivity() {
         setContent {
 //            PreviewFunction()
 //            Recomposable()
-            Theme()
+//            Theme()
+//            ListComposable()
+            Counter()
         }
     }
 }
 
 
 //side effects in jetpack compose
+@Composable
+fun ListComposable() {
+    val categoryState = remember { mutableStateOf(emptyList<String>()) }
 
+    LaunchedEffect(key1 = Unit) {
+        categoryState.value = fetchCategories()
+    }
 
+    LazyColumn {
+        items(categoryState.value) { item ->
+            Text(text = item)
+        }
+    }
+}
+
+fun fetchCategories(): List<String> {
+    return listOf("one", "two", "three")
+}
+
+@Composable
+fun Counter() {
+    var count = remember { mutableStateOf(0) }
+    var key = count.value % 3 == 0
+    LaunchedEffect(key1 = key) {
+        Log.d("Counter", "Current count : ${count.value}")
+    }
+
+    Button(onClick = { count.value++ }) {
+        Text("increment count")
+    }
+}
 
 //light and dark theme
 @Composable
