@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +27,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.compose.learn.main.ui.theme.LearnTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -38,9 +41,69 @@ class MainActivity : ComponentActivity() {
 //            Recomposable()
 //            Theme()
 //            ListComposable()
-            Counter()
+//            Counter()
+//            LaunchEffectComposable()
+            CoroutineScopeComposable()
         }
     }
+}
+
+// remember coroutine scope
+@Composable
+fun LaunchEffectComposable() {
+    val counter = remember { mutableStateOf(0) }
+
+    LaunchedEffect(key1 = Unit) {
+        Log.d("launchEffect", "started...")
+        try {
+            for (i in 1..10) {
+                counter.value++
+                delay(1000)
+            }
+        } catch (e: Exception) {
+            Log.d("launchEffect", "exception : ${e.message.toString()}")
+        }
+    }
+
+    var text = "counter is running ${counter.value}"
+    if (counter.value == 10) {
+        text = "counter stopped"
+    }
+    Text(text = text)
+
+}
+
+@Composable
+fun CoroutineScopeComposable() {
+    val counter = remember { mutableStateOf(0) }
+    //agr kisi event ke andr sideeffect handle krna hai to hum rememberCoroutineScope ka use krte hai
+    //event like onClick
+    var scope = rememberCoroutineScope()
+
+    var text = "counter is running ${counter.value}"
+    if (counter.value == 10) {
+        text = "Counter stopped"
+    }
+
+    Column {
+        Text(text = text)
+        Button(onClick = {
+            scope.launch {
+                Log.d("launchEffect", "started...")
+                try {
+                    for (i in 1..10) {
+                        counter.value++
+                        delay(1000)
+                    }
+                } catch (e: Exception) {
+                    Log.d("launchEffect", "exception : ${e.message.toString()}")
+                }
+            }
+        }) {
+            Text(text = "start")
+        }
+    }
+
 }
 
 
