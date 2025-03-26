@@ -1,7 +1,9 @@
 package com.compose.learn.main
 
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
+import android.view.ViewTreeObserver
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -16,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -24,11 +27,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import com.compose.learn.R
 import com.compose.learn.main.ui.theme.LearnTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -56,9 +64,66 @@ class MainActivity : ComponentActivity() {
 }
 
 
+//Disposable Effect
+@Composable
+fun App() {
+    /*var state = remember { mutableStateOf(false) }
+
+    DisposableEffect(key1 = state.value) {
+        Log.d("code", "Disposable effect started")
+        onDispose {
+            Log.d("code", "Clean up code")
+        }
+    }
+
+    Button(onClick = { state.value = !state.value }) {
+        Text(text = "Change State")
+    }*/
+
+//    MediaComposable()
+    KeyboardComposable()
+    TextField(value = "", onValueChange = {})
+
+}
+
+@Composable
+fun KeyboardComposable() {
+    val view = LocalView.current
+    DisposableEffect(key1 = Unit) {
+        val listner = ViewTreeObserver.OnGlobalLayoutListener {
+            val insets = ViewCompat.getRootWindowInsets(view)
+            val isKeyboardVisible = insets?.isVisible(WindowInsetsCompat.Type.ime())
+            Log.d("code", isKeyboardVisible.toString())
+        }
+        view.viewTreeObserver.addOnGlobalLayoutListener(listner)
+        onDispose {
+            view.viewTreeObserver.removeOnGlobalLayoutListener(listner)
+        }
+    }
+}
+
+@Composable
+fun MediaComposable() {
+    val context = LocalContext.current
+    var state = remember { mutableStateOf(false) }
+    DisposableEffect(state.value) {
+        val mediaPlayer = MediaPlayer.create(context, R.raw.glass)
+        mediaPlayer.start()
+        onDispose {
+            mediaPlayer.stop()
+            mediaPlayer.release()
+        }
+    }
+
+    Button(onClick = { state.value = !state.value }) {
+        Text(text = "restart music")
+    }
+}
+
+
 //rememberUpdateState
 
-fun a() {
+/*fun a() {
     Log.d("code", "I am A")
 }
 
@@ -103,7 +168,7 @@ fun CounterNew(value: Int) {
         Log.d("code", state.value.toString())
     }
     Text(text = value.toString())
-}
+}*/
 
 
 // remember coroutine scope
