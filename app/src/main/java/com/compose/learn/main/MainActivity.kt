@@ -17,9 +17,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,10 +46,65 @@ class MainActivity : ComponentActivity() {
 //            ListComposable()
 //            Counter()
 //            LaunchEffectComposable()
-            CoroutineScopeComposable()
+//            CoroutineScopeComposable()
+
+            App()
+
+
         }
     }
 }
+
+
+//rememberUpdateState
+
+fun a() {
+    Log.d("code", "I am A")
+}
+
+fun b() {
+    Log.d("code", "I am B")
+}
+
+@Composable
+fun App() {
+    var state = remember { mutableStateOf(::a) }
+    Button(onClick = { state.value = ::b }) {
+        Text(text = "Click to change state")
+    }
+    LandingScreen(state.value)
+}
+
+@Composable
+fun LandingScreen(onClick: () -> Unit) {
+    val currentTimeout by rememberUpdatedState(onClick)
+    LaunchedEffect(true) {
+        delay(5000)
+        currentTimeout()
+    }
+}
+
+
+@Composable
+fun CounterApp() {
+    var counter = remember { mutableStateOf(0) }
+    LaunchedEffect(key1 = Unit) {
+        delay(2000)
+        counter.value = 10
+    }
+    CounterNew(counter.value)
+}
+
+@Composable
+fun CounterNew(value: Int) {
+    val state = rememberUpdatedState(value)
+    LaunchedEffect(key1 = Unit) {
+        delay(5000)
+        Log.d("code", state.value.toString())
+    }
+    Text(text = value.toString())
+}
+
 
 // remember coroutine scope
 @Composable
