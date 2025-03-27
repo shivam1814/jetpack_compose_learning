@@ -1,42 +1,41 @@
 package com.compose.learn.main
 
-import android.media.MediaPlayer
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
-import android.view.ViewTreeObserver
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.compose.learn.R
 import com.compose.learn.main.ui.theme.LearnTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -55,19 +54,87 @@ class MainActivity : ComponentActivity() {
 //            Counter()
 //            LaunchEffectComposable()
 //            CoroutineScopeComposable()
+//            App()
 
-            App()
-
-
+//            Counters()
+//            Loader()
+            Derived()
         }
     }
 }
 
 
-//Disposable Effect
+//produceState and derivedStateOf
+@SuppressLint("UnrememberedMutableState")
 @Composable
+fun Derived() {
+    val tableOf = remember { mutableStateOf(5) }
+    val index = produceState(initialValue = 1) {
+        repeat(9) {
+            delay(1000)
+            value += 1
+        }
+    }
+
+    val message = derivedStateOf {
+        "${tableOf.value} * ${index.value} = ${tableOf.value * index.value}"
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize(1f)
+    ) {
+        Text(text = message.value, style = MaterialTheme.typography.headlineLarge)
+    }
+}
+
+
+@Composable
+fun Counters() {
+    val state = produceState(0) {
+        for (i in 1..10) {
+            delay(1000)
+            value += 1
+        }
+    }
+
+    Text(
+        text = state.value.toString(),
+        style = MaterialTheme.typography.headlineLarge
+    )
+}
+
+@Composable
+fun Loader() {
+    val degree = produceState(0) {
+        while (true) {
+            delay(20)
+            value = (value + 15) % 360
+        }
+    }
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize(1f),
+        content = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = "",
+                    modifier = Modifier
+                        .size(60.dp)
+                        .rotate(degree.value.toFloat())
+                )
+                Text(text = "Loading")
+            }
+        }
+    )
+}
+
+
+//Disposable Effect
+/*@Composable
 fun App() {
-    /*var state = remember { mutableStateOf(false) }
+    *//*var state = remember { mutableStateOf(false) }
 
     DisposableEffect(key1 = state.value) {
         Log.d("code", "Disposable effect started")
@@ -78,7 +145,7 @@ fun App() {
 
     Button(onClick = { state.value = !state.value }) {
         Text(text = "Change State")
-    }*/
+    }*//*
 
 //    MediaComposable()
     KeyboardComposable()
@@ -118,7 +185,7 @@ fun MediaComposable() {
     Button(onClick = { state.value = !state.value }) {
         Text(text = "restart music")
     }
-}
+}*/
 
 
 //rememberUpdateState
