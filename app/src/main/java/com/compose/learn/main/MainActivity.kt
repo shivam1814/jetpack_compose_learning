@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,12 +31,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.compose.composable
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.compose.learn.main.ui.theme.LearnTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -58,9 +63,62 @@ class MainActivity : ComponentActivity() {
 
 //            Counters()
 //            Loader()
-            Derived()
+//            Derived()
+
+            NavApp()
+
         }
     }
+}
+
+
+@Composable
+fun NavApp() {
+    val navController = rememberNavController()
+    NavHost(
+        navController = navController,
+        startDestination = "registration",
+        route = "root"
+    ) {
+        composable(route = "registration") {
+            RegistrationScreen {
+                navController.navigate("main/${it}")
+            }
+        }
+        composable(route = "login") {
+            LoginScreen()
+        }
+        composable(route = "main/{email}", arguments = listOf(
+            navArgument("email") {
+                type = NavType.StringType
+            }
+        )) {
+            val email = it.arguments!!.getString("email")
+            MainScreen(email!!)
+        }
+    }
+}
+
+
+//navigation
+@Composable
+fun RegistrationScreen(onClick: (email: String) -> Unit) {
+    Text(
+        text = "Registration Screen",
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier.clickable {
+            onClick("shiavm@gmail.com")
+        })
+}
+
+@Composable
+fun LoginScreen() {
+    Text(text = "Login Screen", style = MaterialTheme.typography.bodyMedium)
+}
+
+@Composable
+fun MainScreen(email: String) {
+    Text(text = "Main Screen - $email", style = MaterialTheme.typography.bodyMedium)
 }
 
 
