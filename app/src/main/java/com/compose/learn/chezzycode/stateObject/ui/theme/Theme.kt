@@ -1,6 +1,5 @@
-package com.compose.learn.main.ui.theme
+package com.compose.learn.chezzycode.stateObject.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

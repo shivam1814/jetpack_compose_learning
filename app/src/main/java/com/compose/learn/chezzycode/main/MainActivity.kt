@@ -1,4 +1,4 @@
-package com.compose.learn.main
+package com.compose.learn.chezzycode.main
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -41,7 +41,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.compose.learn.main.ui.theme.LearnTheme
+import com.compose.learn.chezzycode.main.ui.theme.LearnTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

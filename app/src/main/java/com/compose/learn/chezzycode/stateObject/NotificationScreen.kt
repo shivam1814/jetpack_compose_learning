@@ -1,4 +1,4 @@
-package com.compose.learn.stateObject
+package com.compose.learn.chezzycode.stateObject
 
 import android.util.Log
 import androidx.compose.foundation.Image

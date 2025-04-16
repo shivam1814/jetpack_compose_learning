@@ -1,4 +1,4 @@
-package com.compose.learn.stateObject.ui.theme
+package com.compose.learn.philipp.practice.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

@@ -2,4 +2,5 @@
     <string name="app_name">Learn</string>
     <string name="title_activity_state_object">StateObjectActivity</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_practice">PracticeActivity</string>
 </resources>

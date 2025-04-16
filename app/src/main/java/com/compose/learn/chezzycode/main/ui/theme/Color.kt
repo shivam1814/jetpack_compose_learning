@@ -1,4 +1,4 @@
-package com.compose.learn.main.ui.theme
+package com.compose.learn.chezzycode.main.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

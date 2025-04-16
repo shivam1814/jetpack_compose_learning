@@ -1,4 +1,4 @@
-package com.compose.learn.stateObject.ui.theme
+package com.compose.learn.philipp.practice.ui.theme
 
 import android.app.Activity
 import android.os.Build
