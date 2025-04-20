@@ -3,4 +3,5 @@
     <string name="title_activity_state_object">StateObjectActivity</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_practice">PracticeActivity</string>
+    <string name="title_activity_meditation">MeditationActivity</string>
 </resources>
