@@ -65,11 +65,13 @@ fun GreetingSection(
         ) {
             Text(
                 text = "Good Morning, $name",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.White
             )
             Text(
                 text = "We wish tou have good day!",
-                style = MaterialTheme.typography.titleSmall
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color(0x80FFFFFF),
             )
         }
         Icon(
