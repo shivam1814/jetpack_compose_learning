@@ -156,9 +156,8 @@ fun ShowPreview() {
         }
     }*/
 
-    
-
-    Surface(
+    //timer
+    /*Surface(
         color = Color(0xFF101010),
         modifier = Modifier.fillMaxSize()
     ) {
@@ -173,7 +172,10 @@ fun ShowPreview() {
                 modifier = Modifier.size(200.dp)
             )
         }
-    }
+    }*/
+
+    //navigation
+    Navigation()
 
 
 }
