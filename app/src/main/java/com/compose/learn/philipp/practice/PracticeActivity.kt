@@ -1,10 +1,17 @@
+@file:OptIn(ExperimentalPermissionsApi::class)
+
 package com.compose.learn.philipp.practice
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
+import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -19,6 +26,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,15 +35,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.BadgedBox
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -75,7 +89,20 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.compose.learn.R
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.permissions.shouldShowRationale
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.PI
@@ -94,6 +121,7 @@ class PracticeActivity : ComponentActivity() {
     }
 }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview(showBackground = true)
 @Composable
 fun ShowPreview() {
@@ -175,9 +203,329 @@ fun ShowPreview() {
     }*/
 
     //navigation
-    Navigation()
+    //Navigation()
+
+    //splash screen
+    //SplashNavigation()
+
+    //Bottom Navigation with badge
+    /*val navController = rememberNavController()
+    Scaffold(
+        bottomBar = {
+            BottomNavigationBar(
+                items = listOf(
+                    BottomNavItem(
+                        name = "Home",
+                        route = "home",
+                        icon = Icons.Default.Home
+                    ),
+                    BottomNavItem(
+                        name = "Chat",
+                        route = "chats",
+                        icon = Icons.Default.Notifications,
+                        badgeCount = 200
+                    ),
+                    BottomNavItem(
+                        name = "Settings",
+                        route = "settings",
+                        icon = Icons.Default.Settings
+                    )
+                ),
+                navController = navController,
+                onItemClick = {
+                    navController.navigate(it.route)
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    )
+    {
+        BottomNavigationTask(navController = navController)
+    }*/
+
+    //Multi-Select LazyColumn
+    //MultiSelectLazyColumn()
+
+    //permission
+    HandlePermission()
 
 
+}
+
+@Composable
+fun HandlePermission() {
+    val permissionState = rememberMultiplePermissionsState(
+        permissions = listOf(
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.CAMERA
+        )
+    )
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(
+        key1 = lifecycleOwner,
+        effect = {
+            val observer = LifecycleEventObserver { _, event ->
+                if(event == Lifecycle.Event.ON_START) {
+                    permissionState.launchMultiplePermissionRequest()
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
+    )
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        permissionState.permissions.forEach { perm ->
+            when (perm.permission) {
+                Manifest.permission.CAMERA -> {
+                    when {
+                        perm.status.isGranted -> {
+                            Text(text = "Camera permission accepted")
+                        }
+
+                        perm.status.shouldShowRationale -> {
+                            Text(text = "Camera permission is needed" + "to access camera")
+                        }
+
+                        perm.isPermanentlyDenied() -> {
+                            Text(text = "Camera permission was permanently denied")
+                        }
+                    }
+                }
+
+                Manifest.permission.RECORD_AUDIO -> {
+                    when {
+                        perm.status.isGranted -> {
+                            Text(text = "Record audio permission accepted")
+                        }
+
+                        perm.status.shouldShowRationale -> {
+                            Text(text = "Record audio permission is needed" + "to record audio")
+                        }
+
+                        perm.isPermanentlyDenied() -> {
+                            Text(text = "Record audio permission was permanently denied")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+@Composable
+fun MultiSelectLazyColumn() {
+    var items by remember {
+        mutableStateOf(
+            (1..20).map {
+                ListItem(
+                    title = "Item $it",
+                    isSelected = false
+                )
+            }
+        )
+    }
+    Log.d("selected", items.filter { it.isSelected }.toString())
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(items.size) { i ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        items = items.mapIndexed { j, item ->
+                            if (i == j) {
+                                item.copy(isSelected = !item.isSelected)
+                            } else {
+                                item
+                            }
+                        }
+                    }
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = items[i].title)
+                if (items[i].isSelected) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Selected icon",
+                        tint = Color.Green,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BottomNavigationTask(navController: NavHostController) {
+
+    NavHost(navController = navController, startDestination = "home") {
+        composable("home") {
+            HomeScreen()
+        }
+        composable("chats") {
+            ChatScreen()
+        }
+        composable("settings") {
+            SettingScreen()
+        }
+    }
+
+}
+
+@Composable
+fun BottomNavigationBar(
+    items: List<BottomNavItem>,
+    navController: NavHostController,
+    modifier: Modifier,
+    onItemClick: (BottomNavItem) -> Unit
+) {
+    val backStackEntry = navController.currentBackStackEntryAsState()
+    BottomNavigation(
+        modifier = modifier,
+        backgroundColor = Color.DarkGray,
+        elevation = 5.dp,
+    ) {
+        items.forEach { item ->
+            val selected = item.route == backStackEntry.value?.destination?.route
+            val iconColor = if (selected) Color.Green else Color.Gray
+            val badgeTextColor = if (selected) Color.White else Color.DarkGray
+            BottomNavigationItem(
+                selected = selected,
+                onClick = { onItemClick(item) },
+                icon = {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        if (item.badgeCount > 0) {
+                            BadgedBox(
+                                badge = {
+                                    Text(
+                                        text = item.badgeCount.toString(),
+                                        color = badgeTextColor
+                                    )
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = item.name,
+                                    tint = iconColor
+                                )
+                            }
+                        } else {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.name,
+                                tint = iconColor
+                            )
+                        }
+                        if (selected) {
+                            Text(
+                                text = item.name,
+                                textAlign = TextAlign.Center,
+                                fontSize = 10.sp,
+                                color = iconColor
+                            )
+                        }
+                    }
+                }
+            )
+        }
+
+    }
+
+}
+
+
+@Composable
+fun HomeScreen() {
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = "Home Screen")
+    }
+
+}
+
+@Composable
+fun ChatScreen() {
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = "Chat Screen")
+    }
+
+}
+
+@Composable
+fun SettingScreen() {
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = "Setting Screen")
+    }
+
+}
+
+@Composable
+fun SplashNavigation() {
+    val navController = rememberNavController()
+
+    NavHost(navController = navController, startDestination = "splash_screen") {
+        composable("splash_screen") {
+            SplashScreen(navController = navController)
+        }
+        composable("main_screen") {
+            Text(text = "Main Screen")
+        }
+    }
+}
+
+@Composable
+fun SplashScreen(navController: NavController) {
+
+    val scale = remember {
+        Animatable(0f)
+    }
+
+    LaunchedEffect(key1 = true) {
+        scale.animateTo(
+            targetValue = 0.3f,
+            animationSpec = tween(
+                durationMillis = 500,
+                easing = {
+                    OvershootInterpolator(2f).getInterpolation(it)
+                }
+            )
+        )
+        delay(3000L)
+        navController.navigate("main_screen")
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Image(painter = painterResource(R.drawable.apple), contentDescription = "splashLogo")
+    }
 }
 
 
@@ -370,7 +718,8 @@ fun MusicKnob(
                             }
                             rotation = fixedAngle
 
-                            val parent = (fixedAngle - limitingAngle) / (360f - 2 * limitingAngle)
+                            val parent =
+                                (fixedAngle - limitingAngle) / (360f - 2 * limitingAngle)
                             onValueChange(parent)
                             true
                         } else false

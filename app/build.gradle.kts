@@ -53,6 +53,8 @@ dependencies {
     implementation (libs.androidx.navigation.compose)
 
     implementation ("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+    implementation("androidx.compose.material:material:1.5.0") // or latest stable version
+    implementation("com.google.accompanist:accompanist-permissions:0.37.3") //permission handle
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
