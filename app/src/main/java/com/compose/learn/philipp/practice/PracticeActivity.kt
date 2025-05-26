@@ -38,6 +38,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.BadgedBox
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
@@ -46,6 +47,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -247,9 +249,86 @@ fun ShowPreview() {
     //MultiSelectLazyColumn()
 
     //permission
-    HandlePermission()
+    //HandlePermission()
 
+    //clean theming in compose
+    /*Surface(
+        color = MaterialTheme.colors.background,
+        modifier = Modifier.padding(
+            MaterialTheme.spacing.default
+        )
+    ) {
+        LocalSpacing.current.default
+        LocalString.current.secondary
+    }*/
 
+    //support all screen size
+    SupportScreenSize()
+
+}
+
+@Composable
+fun SupportScreenSize() {
+    val windowInfo = rememberWindowInfo()
+    if (windowInfo.screenWindowInfo is WindowInfo.WindowType.Compact) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(10) {
+                Text(
+                    text = "Item $it",
+                    fontSize = 25.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.Green)
+                        .padding(16.dp)
+                )
+            }
+            items(10) {
+                Text(
+                    text = "Item $it",
+                    fontSize = 25.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.Cyan)
+                        .padding(16.dp)
+                )
+            }
+        }
+    } else {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ){
+            LazyColumn(
+                modifier = Modifier.weight(1f)
+            ) {
+                items(10) {
+                    Text(
+                        text = "Item $it",
+                        fontSize = 25.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.Green)
+                            .padding(16.dp)
+                    )
+                }
+            }
+            LazyColumn(
+                modifier = Modifier.weight(1f)
+            ) {
+                items(10) {
+                    Text(
+                        text = "Item $it",
+                        fontSize = 25.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.Cyan)
+                            .padding(16.dp)
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -266,7 +345,7 @@ fun HandlePermission() {
         key1 = lifecycleOwner,
         effect = {
             val observer = LifecycleEventObserver { _, event ->
-                if(event == Lifecycle.Event.ON_START) {
+                if (event == Lifecycle.Event.ON_START) {
                     permissionState.launchMultiplePermissionRequest()
                 }
             }
@@ -447,7 +526,6 @@ fun BottomNavigationBar(
     }
 
 }
-
 
 @Composable
 fun HomeScreen() {
