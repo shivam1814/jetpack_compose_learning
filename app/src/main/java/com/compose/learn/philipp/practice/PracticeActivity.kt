@@ -21,6 +21,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,21 +36,29 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.BadgedBox
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material.BottomSheetValue
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.rememberBottomSheetState
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -61,6 +70,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -74,6 +84,7 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -91,6 +102,9 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
+import androidx.constraintlayout.compose.ExperimentalMotionApi
+import androidx.constraintlayout.compose.MotionLayout
+import androidx.constraintlayout.compose.MotionScene
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -263,8 +277,115 @@ fun ShowPreview() {
     }*/
 
     //support all screen size
-    SupportScreenSize()
+    //SupportScreenSize()
 
+    //Complex Animations With MotionLayout
+    /*Column {
+        var progress by remember {
+            mutableStateOf(0f)
+        }
+        MotionLayoutAnimation(progress)
+        Spacer(modifier = Modifier.height(32.dp))
+        Slider(value = progress, onValueChange = {
+            progress = it
+        }, modifier = Modifier.padding(horizontal = 32.dp))
+    }*/
+
+    //pagination
+
+
+    //bottom sheet
+    //ShowModalBottomSheet()
+
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ShowModalBottomSheet(modifier: Modifier = Modifier) {
+
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = false, // Allows partial state
+        confirmValueChange = { true } // Optional: allows all state changes
+    )
+    val scope = rememberCoroutineScope()
+    var showSheet by remember { mutableStateOf(false) }
+
+    if (showSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showSheet = false },
+            sheetState = sheetState,
+            containerColor = Color.Green
+        ) {
+            // Content height < full screen to allow partial state
+            Box(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(200.dp), // less height encourages partial state
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "Bottom Sheet", fontSize = 30.sp)
+            }
+        }
+
+        // Launch this effect to show the sheet after composition
+        LaunchedEffect(Unit) {
+            sheetState.partialExpand() // Explicitly expand to partial state
+        }
+    }
+
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Button(onClick = {
+            showSheet = true
+        }) {
+            Text("Toggle")
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMotionApi::class)
+@Composable
+fun MotionLayoutAnimation(progress: Float) {
+    val context = LocalContext.current
+    val motionScene = remember {
+        context.resources.openRawResource(R.raw.motion_scene).readBytes().decodeToString()
+    }
+    MotionLayout(
+        motionScene = MotionScene(content = motionScene),
+        progress = progress,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.DarkGray)
+                .layoutId("box")
+        )
+
+        Image(
+            painter = painterResource(R.drawable.user),
+            contentDescription = "profilePic",
+            modifier = Modifier
+                .clip(CircleShape)
+                .border(
+                    width = 2.dp,
+                    color = Color.Green,
+                    shape = CircleShape
+                )
+                .layoutId("profile_pic")
+        )
+        Text(
+            text = "shivam mandalia",
+            fontSize = 24.sp,
+            modifier = Modifier.layoutId("username")
+        )
+
+    }
 }
 
 @Composable
@@ -298,7 +419,7 @@ fun SupportScreenSize() {
     } else {
         Row(
             modifier = Modifier.fillMaxWidth()
-        ){
+        ) {
             LazyColumn(
                 modifier = Modifier.weight(1f)
             ) {
@@ -335,26 +456,22 @@ fun SupportScreenSize() {
 fun HandlePermission() {
     val permissionState = rememberMultiplePermissionsState(
         permissions = listOf(
-            Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.CAMERA
+            Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA
         )
     )
 
     val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(
-        key1 = lifecycleOwner,
-        effect = {
-            val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_START) {
-                    permissionState.launchMultiplePermissionRequest()
-                }
-            }
-            lifecycleOwner.lifecycle.addObserver(observer)
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
+    DisposableEffect(key1 = lifecycleOwner, effect = {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START) {
+                permissionState.launchMultiplePermissionRequest()
             }
         }
-    )
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    })
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -403,36 +520,31 @@ fun HandlePermission() {
 @Composable
 fun MultiSelectLazyColumn() {
     var items by remember {
-        mutableStateOf(
-            (1..20).map {
-                ListItem(
-                    title = "Item $it",
-                    isSelected = false
-                )
-            }
-        )
+        mutableStateOf((1..20).map {
+            ListItem(
+                title = "Item $it", isSelected = false
+            )
+        })
     }
     Log.d("selected", items.filter { it.isSelected }.toString())
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
         items(items.size) { i ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        items = items.mapIndexed { j, item ->
-                            if (i == j) {
-                                item.copy(isSelected = !item.isSelected)
-                            } else {
-                                item
-                            }
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    items = items.mapIndexed { j, item ->
+                        if (i == j) {
+                            item.copy(isSelected = !item.isSelected)
+                        } else {
+                            item
                         }
                     }
-                    .padding(16.dp),
+                }
+                .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+                verticalAlignment = Alignment.CenterVertically) {
                 Text(text = items[i].title)
                 if (items[i].isSelected) {
                     Icon(
@@ -481,46 +593,39 @@ fun BottomNavigationBar(
             val selected = item.route == backStackEntry.value?.destination?.route
             val iconColor = if (selected) Color.Green else Color.Gray
             val badgeTextColor = if (selected) Color.White else Color.DarkGray
-            BottomNavigationItem(
-                selected = selected,
-                onClick = { onItemClick(item) },
-                icon = {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        if (item.badgeCount > 0) {
-                            BadgedBox(
-                                badge = {
-                                    Text(
-                                        text = item.badgeCount.toString(),
-                                        color = badgeTextColor
-                                    )
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = item.icon,
-                                    contentDescription = item.name,
-                                    tint = iconColor
-                                )
-                            }
-                        } else {
+            BottomNavigationItem(selected = selected, onClick = { onItemClick(item) }, icon = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (item.badgeCount > 0) {
+                        BadgedBox(badge = {
+                            Text(
+                                text = item.badgeCount.toString(), color = badgeTextColor
+                            )
+                        }) {
                             Icon(
                                 imageVector = item.icon,
                                 contentDescription = item.name,
                                 tint = iconColor
                             )
                         }
-                        if (selected) {
-                            Text(
-                                text = item.name,
-                                textAlign = TextAlign.Center,
-                                fontSize = 10.sp,
-                                color = iconColor
-                            )
-                        }
+                    } else {
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = item.name,
+                            tint = iconColor
+                        )
+                    }
+                    if (selected) {
+                        Text(
+                            text = item.name,
+                            textAlign = TextAlign.Center,
+                            fontSize = 10.sp,
+                            color = iconColor
+                        )
                     }
                 }
-            )
+            })
         }
 
     }
@@ -531,8 +636,7 @@ fun BottomNavigationBar(
 fun HomeScreen() {
 
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
         Text(text = "Home Screen")
     }
@@ -543,8 +647,7 @@ fun HomeScreen() {
 fun ChatScreen() {
 
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
         Text(text = "Chat Screen")
     }
@@ -555,8 +658,7 @@ fun ChatScreen() {
 fun SettingScreen() {
 
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
         Text(text = "Setting Screen")
     }
@@ -585,22 +687,15 @@ fun SplashScreen(navController: NavController) {
     }
 
     LaunchedEffect(key1 = true) {
-        scale.animateTo(
-            targetValue = 0.3f,
-            animationSpec = tween(
-                durationMillis = 500,
-                easing = {
-                    OvershootInterpolator(2f).getInterpolation(it)
-                }
-            )
-        )
+        scale.animateTo(targetValue = 0.3f, animationSpec = tween(durationMillis = 500, easing = {
+            OvershootInterpolator(2f).getInterpolation(it)
+        }))
         delay(3000L)
         navController.navigate("main_screen")
     }
 
     Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize()
+        contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()
     ) {
         Image(painter = painterResource(R.drawable.apple), contentDescription = "splashLogo")
     }
@@ -641,13 +736,9 @@ fun Timer(
         }
     }
 
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .onSizeChanged {
-                size = it
-            }
-    ) {
+    Box(contentAlignment = Alignment.Center, modifier = modifier.onSizeChanged {
+        size = it
+    }) {
         Canvas(modifier = modifier) {
             drawArc(
                 color = inactiveBarColor,
@@ -719,13 +810,10 @@ fun Timer(
 
 @Composable
 fun VolumeBar(
-    modifier: Modifier = Modifier,
-    activeBars: Int = 0,
-    barCount: Int = 10
+    modifier: Modifier = Modifier, activeBars: Int = 0, barCount: Int = 10
 ) {
     BoxWithConstraints(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
+        contentAlignment = Alignment.Center, modifier = modifier
     ) {
         val barWidth = remember {
             constraints.maxWidth / (2f * barCount)
@@ -746,9 +834,7 @@ fun VolumeBar(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MusicKnob(
-    modifier: Modifier = Modifier,
-    limitingAngle: Float = 25f,
-    onValueChange: (Float) -> Unit
+    modifier: Modifier = Modifier, limitingAngle: Float = 25f, onValueChange: (Float) -> Unit
 ) {
     var rotation by remember {
         mutableStateOf(limitingAngle)
@@ -770,8 +856,7 @@ fun MusicKnob(
         mutableStateOf(0f)
     }
 
-    Image(
-        painter = painterResource(R.drawable.music_knob),
+    Image(painter = painterResource(R.drawable.music_knob),
         contentDescription = "Music knob",
         modifier = modifier
             .fillMaxSize()
@@ -786,8 +871,7 @@ fun MusicKnob(
                 val angle = -atan2(centerX - touchX, centerY - touchY) * (180f / PI).toFloat()
 
                 when (event.action) {
-                    MotionEvent.ACTION_DOWN,
-                    MotionEvent.ACTION_MOVE -> {
+                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
                         if (angle !in -limitingAngle..limitingAngle) {
                             val fixedAngle = if (angle in -180f..-limitingAngle) {
                                 360f + angle
@@ -796,8 +880,7 @@ fun MusicKnob(
                             }
                             rotation = fixedAngle
 
-                            val parent =
-                                (fixedAngle - limitingAngle) / (360f - 2 * limitingAngle)
+                            val parent = (fixedAngle - limitingAngle) / (360f - 2 * limitingAngle)
                             onValueChange(parent)
                             true
                         } else false
@@ -807,8 +890,7 @@ fun MusicKnob(
                 }
 
             }
-            .rotate(rotation)
-    )
+            .rotate(rotation))
 
 }
 
@@ -827,10 +909,8 @@ fun CircularProgressBar(
         mutableStateOf(false)
     }
     val curPercentage = animateFloatAsState(
-        targetValue = if (animationPlayed) percentage else 0f,
-        animationSpec = tween(
-            durationMillis = animDuration,
-            delayMillis = animDelay
+        targetValue = if (animationPlayed) percentage else 0f, animationSpec = tween(
+            durationMillis = animDuration, delayMillis = animDelay
         )
     )
 
@@ -839,8 +919,7 @@ fun CircularProgressBar(
     }
 
     Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.size(radius * 2f)
+        contentAlignment = Alignment.Center, modifier = Modifier.size(radius * 2f)
     ) {
         Canvas(modifier = Modifier.size(radius * 2f)) {
             drawArc(
@@ -866,16 +945,13 @@ fun SimpleAnimation() {
     var sizeState by remember { mutableStateOf(200.dp) }
 
     val sizeAnimate by animateDpAsState(
-        targetValue = sizeState,
-        animationSpec = /*tween(
+        targetValue = sizeState, animationSpec = /*tween(
             durationMillis = 2000,
             delayMillis = 300,
             easing = LinearOutSlowInEasing
-        )*/
-        /*spring(
+        )*//*spring(
             Spring.DampingRatioLowBouncy
-        )*/
-        /*keyframes {
+        )*//*keyframes {
             durationMillis = 5000
             sizeState at 0 with LinearEasing
             sizeState * 1.5f at 1000 with FastOutLinearInEasing
@@ -888,19 +964,15 @@ fun SimpleAnimation() {
 
     val infiniteTransition = rememberInfiniteTransition()
     val color by infiniteTransition.animateColor(
-        initialValue = Color.Red,
-        targetValue = Color.Green,
-        animationSpec = infiniteRepeatable(
-            tween(durationMillis = 1000),
-            repeatMode = RepeatMode.Reverse
+        initialValue = Color.Red, targetValue = Color.Green, animationSpec = infiniteRepeatable(
+            tween(durationMillis = 1000), repeatMode = RepeatMode.Reverse
         )
     )
 
     Box(
         modifier = Modifier
             .size(sizeAnimate)
-            .background(color),
-        contentAlignment = Alignment.Center
+            .background(color), contentAlignment = Alignment.Center
     ) {
         Column {
             Button(onClick = {
@@ -1015,10 +1087,8 @@ fun SnackBar() {
 
     val scope = rememberCoroutineScope()
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        snackbarHost = { SnackbarHost(hostState = state) }
-    ) {
+    Scaffold(modifier = Modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(hostState = state) }) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -1028,16 +1098,11 @@ fun SnackBar() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            TextField(
-                value = textFieldState,
-                label = {
-                    Text(text = "Enter your name")
-                },
-                onValueChange = {
-                    textFieldState = it
-                },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+            TextField(value = textFieldState, label = {
+                Text(text = "Enter your name")
+            }, onValueChange = {
+                textFieldState = it
+            }, singleLine = true, modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = {
@@ -1080,14 +1145,10 @@ fun ColorBox(modifier: Modifier = Modifier, updateColor: (Color) -> Unit) {
         .clickable {
             updateColor(
                 Color(
-                    Random.nextFloat(),
-                    Random.nextFloat(),
-                    Random.nextFloat(),
-                    1f
+                    Random.nextFloat(), Random.nextFloat(), Random.nextFloat(), 1f
                 )
             )
-        }
-    )
+        })
 }
 
 @Composable
@@ -1110,8 +1171,7 @@ fun CustomTxt() {
                 append("etpack ")
                 withStyle(
                     style = SpanStyle(
-                        color = Color.Green,
-                        fontSize = 50.sp
+                        color = Color.Green, fontSize = 50.sp
                     )
                 ) {
                     append("C")
