@@ -2,6 +2,7 @@
 
 package com.compose.learn.philipp.practice
 
+import AppBar
 import android.Manifest
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -29,11 +30,13 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
@@ -41,23 +44,36 @@ import androidx.compose.material.BadgedBox
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.BottomSheetValue
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DrawerDefaults
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -108,6 +124,7 @@ import androidx.constraintlayout.compose.MotionScene
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -137,6 +154,7 @@ class PracticeActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview(showBackground = true)
 @Composable
@@ -292,12 +310,121 @@ fun ShowPreview() {
     }*/
 
     //pagination
-
+    //Pagination()
 
     //bottom sheet
     //ShowModalBottomSheet()
 
+    //navigation drawer
+    //not working
+    DrawerScreen()
 
+
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DrawerScreen() {
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    MaterialTheme { // ✅ Material3 Theme!
+        ModalNavigationDrawer(
+            drawerState = drawerState,
+            gesturesEnabled = false, // Prevent swipe to open (optional)
+            drawerContent = {
+
+                Surface(
+                    modifier = Modifier.width(DrawerDefaults.MaximumDrawerWidth)
+                ) {
+                    Column(modifier = Modifier.background(Color.Yellow).fillMaxHeight()) {
+                        DrawerHeader()
+                        DrawerBody(
+                            drawerItems = listOf(
+                                DrawerMenuItem("1", "Home", "Go to home", Icons.Default.Home),
+                                DrawerMenuItem("2", "Settings", "Go to settings", Icons.Default.Settings),
+                                DrawerMenuItem("3", "Help", "Help info", Icons.Default.Info)
+                            ),
+                            onItemClick = {
+                                println("Clicked on ${it.title}")
+                                scope.launch { drawerState.close() }
+                            }
+                        )
+                    }
+                }
+
+            }
+        ) {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text("My App") },
+                        navigationIcon = {
+                            IconButton(onClick = {
+                                println("Menu Clicked") // ✅ Debug print
+                                scope.launch { drawerState.open() }
+                            }) {
+                                Icon(Icons.Default.Menu,contentDescription = "Menu")
+                            }
+                        },
+                        modifier = Modifier.background(Color.Blue)
+                    )
+                }
+            ) { padding ->
+                Box(
+                    modifier = Modifier
+                        .padding(padding)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Main Content")
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun Pagination(modifier: Modifier = Modifier) {
+    val viewModel = viewModel<MainViewModel>()
+    val state = viewModel.state
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(state.items.size) { index ->
+            val item = state.items[index]
+            if (index >= state.items.size - 1 && !state.endReached && !state.isLoading) {
+                viewModel.loadNextItem()
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = item.title,
+                    fontSize = 20.sp,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(item.description)
+            }
+        }
+        item {
+            if (state.isLoading) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
