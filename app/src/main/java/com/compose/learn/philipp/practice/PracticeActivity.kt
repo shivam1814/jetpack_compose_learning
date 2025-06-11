@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,8 +39,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BadgedBox
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
@@ -316,11 +321,40 @@ fun ShowPreview() {
     //ShowModalBottomSheet()
 
     //navigation drawer
-    //not working
-    DrawerScreen()
+    //DrawerScreen()
+
+    //Lazy Grid
+    LazyGrid()
 
 
+}
 
+@Composable
+fun LazyGrid() {
+    val size = 100
+    val state = rememberLazyGridState(
+        initialFirstVisibleItemIndex = size/2,
+    )
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(100.dp),
+        modifier = Modifier.fillMaxSize(),
+        state = state,
+        content = {
+            items(size) { i ->
+
+                Box(
+                    modifier = Modifier.padding(8.dp)
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(Color.Green),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "Item $i")
+                }
+
+            }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
